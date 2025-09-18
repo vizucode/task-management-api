@@ -1,4 +1,6 @@
-CREATE TYPE task_status AS ENUM('pending', 'in_progress', 'completed', 'archived');
+DROP TYPE IF EXISTS task_status;
+CREATE TYPE task_status AS ENUM ('pending', 'in_progress', 'completed', 'archived');
+
 
 CREATE TABLE IF NOT EXISTS tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
