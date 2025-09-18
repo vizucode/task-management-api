@@ -1,11 +1,34 @@
+// @title Task Management API
+// @version 1.0
+// @description API untuk mengelola tasks dengan authentication JWT
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
+
 package main
 
 import (
-	"github.com/origamilabsid/backend-boilerplate/apps/middlewares/security"
-	"github.com/origamilabsid/backend-boilerplate/apps/repositories/psql"
-	routerRest "github.com/origamilabsid/backend-boilerplate/apps/router/rest"
-	"github.com/origamilabsid/backend-boilerplate/apps/service/todo"
-	errorhandler "github.com/origamilabsid/backend-boilerplate/helpers/error_handler"
+	"task-management-api/apps/middlewares/security"
+	"task-management-api/apps/repositories/psql"
+	routerRest "task-management-api/apps/router/rest"
+	"task-management-api/apps/service/task"
+	"task-management-api/apps/service/user"
+	errorhandler "task-management-api/helpers/error_handler"
+
+	_ "task-management-api/docs" // Import docs
 
 	"github.com/go-playground/validator/v10"
 	"github.com/vizucode/gokit/adapter/dbc"
@@ -40,21 +63,23 @@ func main() {
 	*/
 	postgreDB := psql.NewPsql(dbConnection.DB)
 
-	// apiClient := request.NewRequest(&http.Client{
-	// 	Timeout: 5 * time.Second,
-	// })
-
 	/*
 		Service Mapping
 	*/
-	todoService := todo.NewTodoService(
+	taskService := task.NewTask(
+		postgreDB,
+		validator10,
+	)
+
+	userService := user.NewUser(
 		postgreDB,
 		validator10,
 	)
 
 	restRouter := routerRest.NewRest(
 		security.NewSecurity(),
-		todoService,
+		taskService,
+		userService,
 	)
 
 	app := server.NewService(

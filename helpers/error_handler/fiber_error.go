@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/origamilabsid/backend-boilerplate/helpers/translator"
+	"task-management-api/helpers/translator"
 
 	"github.com/vizucode/gokit/utils/errorkit"
 

@@ -1,0 +1,348 @@
+basePath: /v1
+definitions:
+  domain.Metadata:
+    properties:
+      current_page:
+        example: 1
+        type: integer
+      total_data:
+        example: 100
+        type: integer
+      total_page:
+        example: 10
+        type: integer
+    type: object
+  domain.ResponseJson:
+    properties:
+      data: {}
+      message:
+        example: Success
+        type: string
+      metadata:
+        $ref: '#/definitions/domain.Metadata'
+      status_code:
+        example: "200"
+        type: string
+    type: object
+  domain.SignInResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      username:
+        example: john_doe
+        type: string
+    type: object
+  domain.Task:
+    properties:
+      created_at:
+        example: 2024-01-15 10:30
+        type: string
+      description:
+        example: Write comprehensive API documentation
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        enum:
+        - pending
+        - in_progress
+        - completed
+        example: pending
+        type: string
+      title:
+        example: Complete project documentation
+        type: string
+    required:
+    - status
+    - title
+    type: object
+  domain.User:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      username:
+        example: john_doe
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API untuk mengelola tasks dengan authentication JWT
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Task Management API
+  version: "1.0"
+paths:
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: User login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.ResponseJson'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.SignInResponse'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+      summary: User login
+      tags:
+      - Authentication
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with username, email, and password
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+      summary: Register a new user
+      tags:
+      - Authentication
+  /tasks:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of tasks for authenticated user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by task status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get task list
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.ResponseJson'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Task'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+      security:
+      - BearerAuth: []
+      summary: Get list of tasks
+      tags:
+      - Tasks
+    post:
+      consumes:
+      - application/json
+      description: Create a new task for authenticated user
+      parameters:
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Task'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Task created successfully
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+      security:
+      - BearerAuth: []
+      summary: Create a new task
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - application/json
+      description: Update multiple tasks for authenticated user
+      parameters:
+      - description: Array of tasks to update
+        in: body
+        name: tasks
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/domain.Task'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tasks updated successfully
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "403":
+          description: Forbidden - task ownership violation
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+      security:
+      - BearerAuth: []
+      summary: Update multiple tasks
+      tags:
+      - Tasks
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task deleted successfully
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "403":
+          description: Forbidden - task ownership violation
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+      security:
+      - BearerAuth: []
+      summary: Delete a task
+      tags:
+      - Tasks
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information of a specific task
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get task detail
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.ResponseJson'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Task'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/domain.ResponseJson'
+      security:
+      - BearerAuth: []
+      summary: Get task detail
+      tags:
+      - Tasks
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

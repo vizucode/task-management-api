@@ -3,44 +3,59 @@ package rest
 import (
 	"strconv"
 
-	"github.com/origamilabsid/backend-boilerplate/apps/domain"
-	"github.com/origamilabsid/backend-boilerplate/apps/middlewares"
-	"github.com/origamilabsid/backend-boilerplate/apps/service"
+	"task-management-api/apps/domain"
+	"task-management-api/apps/middlewares"
+	"task-management-api/apps/service"
 
 	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
 type rest struct {
-	mw middlewares.IMiddleware
-
-	todo service.ITodoService
+	mw   middlewares.IMiddleware
+	task service.ITaskService
+	user service.IUserService
 }
 
 func NewRest(
 	mw middlewares.IMiddleware,
-	todo service.ITodoService,
+	task service.ITaskService,
+	user service.IUserService,
 ) *rest {
 	return &rest{
 		mw:   mw,
-		todo: todo,
+		task: task,
+		user: user,
 	}
 }
 
 func (r *rest) Router(app fiber.Router) {
-	v1 := app.Group("/v1")
+	// Swagger documentation
+	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
-	v1.Post("/todo", r.mw.LangTranslate, r.mw.AuthMiddleware, r.getTodo)
+	// User routes
+	app.Post("/signup", r.SignUp)
+	app.Post("/signin", r.SignIn)
+
+	// Task routes (protected)
+	app.Get("/tasks", r.mw.AuthMiddleware, r.GetTaskList)
+	app.Get("/tasks/:id", r.mw.AuthMiddleware, r.GetTaskDetail)
+	app.Post("/tasks", r.mw.AuthMiddleware, r.CreateTask)
+	app.Put("/tasks", r.mw.AuthMiddleware, r.UpdateTask)
+	app.Delete("/tasks/:id", r.mw.AuthMiddleware, r.DeleteTask)
 }
 
 func (rest *rest) ResponseJson(
 	ctx *fiber.Ctx,
 	StatusCode int,
 	data interface{},
+	metadata domain.Metadata,
 	message string,
 ) error {
 	return ctx.Status(StatusCode).JSON(&domain.ResponseJson{
 		StatusCode: strconv.Itoa(StatusCode),
 		Data:       data,
+		Metadata:   metadata,
 		Message:    message,
 	})
 }

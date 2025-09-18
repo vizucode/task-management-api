@@ -1,20 +1,21 @@
-package todo
+package user
 
 import (
+	"task-management-api/apps/repositories"
+
 	"github.com/go-playground/validator/v10"
-	"github.com/origamilabsid/backend-boilerplate/apps/repositories"
 )
 
-type todoService struct {
+type user struct {
 	db        repositories.IDatabase
 	validator validator.Validate
 }
 
-func NewTodoService(
+func NewUser(
 	db repositories.IDatabase,
 	validator *validator.Validate,
-) *todoService {
-	return &todoService{
+) *user {
+	return &user{
 		db:        db,
 		validator: *validator,
 	}

@@ -1,7 +1,6 @@
 package security
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/origamilabsid/backend-boilerplate/apps/domain"
-	contextkeys "github.com/origamilabsid/backend-boilerplate/helpers/constants/context_keys"
-	"github.com/origamilabsid/backend-boilerplate/helpers/constants/httpstd"
-	"github.com/origamilabsid/backend-boilerplate/helpers/constants/rpcstd"
+	"task-management-api/apps/domain"
+	contextkeys "task-management-api/helpers/constants/context_keys"
+	"task-management-api/helpers/constants/httpstd"
+	"task-management-api/helpers/constants/rpcstd"
 
 	"github.com/vizucode/gokit/logger"
 	"github.com/vizucode/gokit/utils/errorkit"
@@ -85,8 +84,7 @@ func (mw *security) AuthMiddleware(c *fiber.Ctx) error {
 		return errorkit.NewErrorStd(http.StatusInternalServerError, rpcstd.INTERNAL, httpstd.InternalServerError)
 	}
 
-	newctx := context.WithValue(ctx, contextkeys.UserContext, UserContext)
-	c.SetUserContext(newctx)
+	c.Locals(contextkeys.UserContext, UserContext)
 
 	return c.Next()
 }
