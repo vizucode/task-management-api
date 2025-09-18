@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/origamilabsid/backend-boilerplate/helpers/constants/rpcstd"
 	"github.com/origamilabsid/backend-boilerplate/helpers/translator"
 
 	"github.com/vizucode/gokit/utils/errorkit"
@@ -16,8 +15,7 @@ import (
 )
 
 type stdRespError struct {
-	StatusCode string `json:"status_code"`
-	Message    string `json:"message"`
+	Message string `json:"message"`
 }
 
 // ErrorHandler handles errors and returns an appropriate response.
@@ -34,8 +32,7 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 				messsage, _ := translator.Translate(sourceMessage, "en", targetLang)
 
 				return ctx.Status(fiber.StatusBadRequest).JSON(stdRespError{
-					StatusCode: "400" + rpcstd.INVALID_ARGUMENT,
-					Message:    messsage,
+					Message: messsage,
 				})
 			case "validate_user_contact":
 				// translate
@@ -44,8 +41,7 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 				messsage, _ := translator.Translate(sourceMessage, "en", targetLang)
 
 				return ctx.Status(fiber.StatusBadRequest).JSON(stdRespError{
-					StatusCode: "400" + rpcstd.INVALID_ARGUMENT,
-					Message:    messsage,
+					Message: messsage,
 				})
 			case "password_regex_validator":
 				// translate
@@ -54,8 +50,7 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 				messsage, _ := translator.Translate(sourceMessage, "en", targetLang)
 
 				return ctx.Status(fiber.StatusBadRequest).JSON(stdRespError{
-					StatusCode: "400" + rpcstd.INVALID_ARGUMENT,
-					Message:    messsage,
+					Message: messsage,
 				})
 			case "min":
 				// translate
@@ -64,8 +59,7 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 				messsage, _ := translator.Translate(sourceMessage, "en", targetLang)
 
 				return ctx.Status(fiber.StatusBadRequest).JSON(stdRespError{
-					StatusCode: "400" + rpcstd.INVALID_ARGUMENT,
-					Message:    messsage,
+					Message: messsage,
 				})
 			case "indonesia_phone":
 				// translate
@@ -74,8 +68,7 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 				messsage, _ := translator.Translate(sourceMessage, "en", targetLang)
 
 				return ctx.Status(fiber.StatusBadRequest).JSON(stdRespError{
-					StatusCode: "400" + rpcstd.INVALID_ARGUMENT,
-					Message:    messsage,
+					Message: messsage,
 				})
 			case "email":
 				// translate
@@ -84,8 +77,7 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 				messsage, _ := translator.Translate(sourceMessage, "en", targetLang)
 
 				return ctx.Status(fiber.StatusBadRequest).JSON(stdRespError{
-					StatusCode: "400" + rpcstd.INVALID_ARGUMENT,
-					Message:    messsage,
+					Message: messsage,
 				})
 			case "max":
 				// translate
@@ -94,8 +86,7 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 				messsage, _ := translator.Translate(sourceMessage, "en", targetLang)
 
 				return ctx.Status(fiber.StatusBadRequest).JSON(stdRespError{
-					StatusCode: "400" + rpcstd.INVALID_ARGUMENT,
-					Message:    messsage,
+					Message: messsage,
 				})
 			}
 		}
@@ -106,16 +97,14 @@ func FiberErrHandler(ctx *fiber.Ctx, err error) error {
 	ok := errors.As(err, &stdError)
 	if ok {
 		return ctx.Status(stdError.HttpStatusCode).JSON(stdRespError{
-			StatusCode: stdError.ErrorCode(),
-			Message:    strings.ToLower(stdError.Error()),
+			Message: strings.ToLower(stdError.Error()),
 		})
 	}
 
 	if err != nil {
 		// translate
 		return ctx.Status(http.StatusNotFound).JSON(stdRespError{
-			StatusCode: "404" + rpcstd.NOT_FOUND,
-			Message:    "data was not found",
+			Message: "data was not found",
 		})
 	}
 

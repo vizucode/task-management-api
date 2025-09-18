@@ -1,6 +1,7 @@
 package security
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -84,7 +85,8 @@ func (mw *security) AuthMiddleware(c *fiber.Ctx) error {
 		return errorkit.NewErrorStd(http.StatusInternalServerError, rpcstd.INTERNAL, httpstd.InternalServerError)
 	}
 
-	c.Locals(contextkeys.UserContext, UserContext)
+	newctx := context.WithValue(ctx, contextkeys.UserContext, UserContext)
+	c.SetUserContext(newctx)
 
 	return c.Next()
 }
