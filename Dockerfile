@@ -13,10 +13,10 @@ RUN go mod tidy
 COPY . .
 
 # Build aplikasi Go Anda
-# -o /app/backend-boilerplate: output biner ke /app/backend-boilerplate
+# -o /app/task-management-api: output biner ke /app/task-management-api
 # -ldflags "-s -w": mengurangi ukuran biner dengan menghilangkan simbol debug
 # main.go: file Go utama yang akan di-build
-RUN CGO_ENABLED=0 go build -o /app/backend-boilerplate -ldflags "-s -w" main.go
+RUN CGO_ENABLED=0 go build -o /app/task-management-api -ldflags "-s -w" main.go
 
 # --- Stage 2: Runner (Produksi) ---
 # Menggunakan image yang sangat minimal untuk menjalankan aplikasi
@@ -29,12 +29,12 @@ FROM scratch AS runner
 # RUN apk add --no-cache ca-certificates # Jika menggunakan alpine, instal sertifikat root
 
 # Salin biner yang sudah di-build dari 'builder' stage
-COPY --from=builder /app/backend-boilerplate /backend-boilerplate
+COPY --from=builder /app/task-management-api /task-management-api
 
 # Expose port jika aplikasi Go Anda adalah server HTTP
 # EXPOSE 8080 # Ganti dengan port yang digunakan aplikasi Anda
 
 # Tentukan perintah untuk menjalankan aplikasi
-ENTRYPOINT ["/backend-boilerplate"]
+ENTRYPOINT ["/task-management-api"]
 # Atau jika Anda menggunakan alpine:
-# CMD ["/backend-boilerplate"]
+# CMD ["/task-management-api"]
